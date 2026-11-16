@@ -17,7 +17,7 @@ Sistema de caixa (PDV) para tapiocaria, feito em Python com Tkinter. Roda no Win
 | Só usar o programa | Windows e o `A_Tapioca.exe` |
 | Rodar pelo código | Python 3.10 ou mais novo, com Tkinter (já vem no instalador do Python) |
 | Seletor de datas no relatório | `pip install tkcalendar` (opcional) |
-| Gerar o `.exe` | `pip install pyinstaller tkcalendar babel` |
+| Gerar o `.exe` | `pip install -r requirements.txt` (o `compilar.ps1` já faz isso) |
 
 ## Rodando pelo código
 
@@ -73,7 +73,7 @@ O programa consulta a última release do repositório configurado em `REPO_ATUAL
 
 Antes de trocar o executável, o `atualizador.py`:
 
-1. Aceita apenas downloads por `https` de endereços do GitHub, inclusive nos redirecionamentos.
+1. Aceita apenas downloads por `https` de endereços do GitHub, inclusive nos redirecionamentos. O certificado do servidor é sempre verificado; se o Windows não tiver o certificado raiz necessário, usa a lista do `certifi`, que vai dentro do `.exe`.
 2. Exige um arquivo `SHA256SUMS` na release e **recusa a atualização sem ele**.
 3. Confere o cabeçalho do arquivo e o SHA-256 do `.exe` baixado.
 4. Guarda o `.exe` atual como `.bak`, troca o arquivo e reabre o programa.
@@ -103,18 +103,30 @@ Os passos da troca ficam registrados em `%TEMP%\atualizador_log.txt`.
 O comando de compilação que o script executa é:
 
 ```
-pyinstaller --onefile --windowed --noconfirm --clean --name A_Tapioca --collect-all tkcalendar --hidden-import babel.numbers A_Tapioca.py
+pyinstaller --onefile --windowed --noconfirm --clean --name A_Tapioca --icon logo.ico --collect-all tkcalendar --collect-data certifi --hidden-import babel.numbers --hidden-import certifi A_Tapioca.py
 ```
 
 ## Estrutura do projeto
 
 ```
-A Tapioca/
-├── A_Tapioca.py      # aplicação (interface, pedidos, cardápio, relatório, persistência)
-├── atualizador.py    # atualização automática via GitHub Releases
-├── compilar.ps1      # compila, gera SHA256SUMS e indica a tag
-└── dist/             # saída do build (A_Tapioca.exe e SHA256SUMS)
+a-tapioca/
+├── A_Tapioca.py          # aplicação (interface, pedidos, cardápio, relatório, persistência)
+├── atualizador.py        # atualização automática via GitHub Releases
+├── compilar.ps1          # instala dependências, compila, gera SHA256SUMS e indica a tag
+├── logo.ico              # ícone do executável
+├── requirements.txt      # dependências
+├── CHANGELOG.md          # histórico de versões
+├── tests/                # testes automatizados do atualizador
+└── .github/workflows/    # execução dos testes a cada push
 ```
+
+## Testes
+
+```
+python -m unittest discover -s tests -v
+```
+
+Cobrem a comparação de versões, a validação de endereços, a leitura do `SHA256SUMS`, a conferência do executável baixado e o script de troca. O histórico de mudanças está em [CHANGELOG.md](CHANGELOG.md).
 
 ## Solução de problemas
 
@@ -123,6 +135,7 @@ A Tapioca/
 | "A versão publicada não tem arquivo SHA256SUMS" | Anexe o `SHA256SUMS` à release (edite a release e envie o arquivo). |
 | "Falha na verificação de integridade" | O `.exe` da release não é o mesmo usado para gerar o `SHA256SUMS`. Gere o hash de novo a partir do `.exe` publicado. |
 | O programa oferece a mesma atualização toda vez | A `VERSAO` dentro do `.exe` é menor que a tag da release. Recompile com a versão certa. |
+| "Não conseguiu validar o certificado de segurança do GitHub" | Confira data e hora do Windows, rode o Windows Update e veja se o antivírus intercepta HTTPS. Versões antes da 1.1.3 não têm a lista própria de certificados e falham com `CERTIFICATE_VERIFY_FAILED`. |
 | "Sem permissão para gravar" | Mova o programa para uma pasta sua, como Documentos. |
 | A atualização não aconteceu | Veja `%TEMP%\atualizador_log.txt`. |
 | Aviso de dados restaurados ao abrir | Um arquivo estava danificado. Foi restaurado do `.bak`, e a cópia ruim ficou em `%APPDATA%\ATapioca`. |
@@ -138,4 +151,4 @@ A Tapioca/
 
 - Registro de pagamentos (forma, valor recebido e troco).
 - Migração dos dados para SQLite, com histórico mais rastreável.
-- Testes automatizados e separação do código em módulos.
+- Testes para a persistência e separação do código em módulos.

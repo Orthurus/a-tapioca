@@ -1,0 +1,21 @@
+# Build do PyInstaller
+build/
+dist/
+*.spec
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+# Dados locais e backups (nunca versionar dados de vendas)
+*.bak
+*.tmp
+*.corrompido-*
+cardapio.json
+vendas.json
+pedidos.json
+config.json
+cupons/
+# Editores
+.vscode/
+.idea/

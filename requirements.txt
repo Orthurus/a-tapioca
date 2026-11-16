@@ -1,0 +1,5 @@
+# Dependências para rodar pelo código e gerar o .exe
+tkcalendar>=1.6
+babel
+certifi
+pyinstaller
