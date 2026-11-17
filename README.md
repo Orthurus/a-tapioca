@@ -85,13 +85,15 @@ Os passos da troca ficam registrados em `%TEMP%\atualizador_log.txt`.
 
 ## Publicando uma nova versão
 
-1. Altere `VERSAO` no `A_Tapioca.py` (por exemplo, `"1.2"`).
-2. Na pasta do projeto, rode:
-   ```
-   powershell -ExecutionPolicy Bypass -File .\compilar.ps1
-   ```
-   O script compila o `.exe`, gera o `SHA256SUMS` e mostra a tag que deve ser usada.
-3. No GitHub, crie uma release com a tag **`v` + versão** (por exemplo, `v1.2`) e anexe `dist\A_Tapioca.exe` e `dist\SHA256SUMS`.
+1. Altere `VERSAO` no `A_Tapioca.py` (por exemplo, `"1.2"`) e descreva a mudança no `CHANGELOG.md` (seção `## 1.2`).
+2. Dê dois cliques em **`publicar.bat`**. Ele compila o `.exe`, gera o `SHA256SUMS` e cria a release no GitHub com a tag `v` + versão, anexando os dois arquivos. As notas da release vêm do `CHANGELOG.md`.
+
+Na primeira vez, o script instala o GitHub CLI (`gh`) e abre o navegador para você autorizar o login. Se não conseguir instalar, ele abre a página de release já com a tag preenchida e a pasta `dist` para você anexar os arquivos à mão. Se a tag já existir, ele para sem publicar nada.
+
+Para só compilar, sem publicar, rode:
+```
+powershell -ExecutionPolicy Bypass -File .\compilar.ps1
+```
 
 **Regras importantes**
 
@@ -112,6 +114,8 @@ pyinstaller --onefile --windowed --noconfirm --clean --name A_Tapioca --icon log
 a-tapioca/
 ├── A_Tapioca.py          # aplicação (interface, pedidos, cardápio, relatório, persistência)
 ├── atualizador.py        # atualização automática via GitHub Releases
+├── publicar.bat          # duplo clique: compila e publica a release no GitHub
+├── publicar.ps1          # script usado pelo publicar.bat
 ├── compilar.ps1          # instala dependências, compila, gera SHA256SUMS e indica a tag
 ├── logo.ico              # ícone do executável
 ├── requirements.txt      # dependências
